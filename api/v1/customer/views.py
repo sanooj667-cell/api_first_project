@@ -212,7 +212,17 @@ def products(request):
 
 def add_product(request):
     user = request.user
-         
+    serializers = ProductSerializer(data=request.data)
+
+    if serializers.is_valied():
+        serializers.save(user = user)
+        return Response({
+            "status_code" : 200,
+            "data" : serializers.data,
+            "message" : "add product sucsessfully"
+        })
+    return Response(serializers.errors,status=400)     
+
 
     
 
