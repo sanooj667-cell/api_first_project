@@ -209,13 +209,15 @@ def products(request):
     
 
     
-
-def add_product(request):
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def add_product(request,id):
     user = request.user
+    category=Category.objects.get(id=id)
     serializers = ProductSerializer(data=request.data)
 
-    if serializers.is_valied():
-        serializers.save(user = user)
+    if serializers.is_valid():
+        serializers.save(user = user,category=category)
         return Response({
             "status_code" : 200,
             "data" : serializers.data,
@@ -226,10 +228,36 @@ def add_product(request):
 
     
 
-
+@api_view(["PUT", "PATCH"])
+@permission_classes([IsAuthenticated])
 def edit_product(request, id):
-    pass
+    user =  request.user 
+    product = Product.objects.get(id=id, user = user)
+    serializer =  ProductSerializer(product,data = request.data, partial = True)
 
+    if serializer.is_valid():
+        serializer.save() 
+        return Response({
+            "status_code":"200",
+            "data":serializer.data,
+            "message": "product edited sucsessfully"
+        })
+    return Response(serializer.errors,status=400 )
+
+    
+@api_view(["DELETE"])
+@permission_classes([IsAuthenticated])
 def delete_product(request, id):
-    pass
+    product = Product.objects.get(id=id, user=request.user)
+    product.delete()
+    response_data ={
+        "status_code" :200,
+        "status" : "sucssus",
+        "message" : "deleted sucssusfully"
+
+    }
+    return Response(response_data)
+
+
+
 
